@@ -55,7 +55,7 @@ class RAGService:
             conversation_context
         )
 
-        # Step 4: Semantic retrieval
+        # Step 4: Semantic retrieval + reranking
         retrieval_results = (
             RetrievalService.semantic_search(
                 db=db,
@@ -63,42 +63,20 @@ class RAGService:
             )
         )
 
-        vector_results = (
-            retrieval_results["vector_results"]
-        )
-
-        keyword_results = (
-            retrieval_results["keyword_results"]
-        )
-
         # Step 5: Build semantic context
         semantic_context_parts = []
 
-        # Vector retrieval context
-        for result in vector_results:
-
-            payload = result.payload
+        for document, score in retrieval_results:
 
             semantic_context_parts.append(
                 f"""
-[Vector Retrieval]
+[Reranked Context]
 
-Title: {payload['title']}
-
-Content:
-{payload['content']}
-"""
-            )
-
-        # Keyword retrieval context
-        for chunk in keyword_results:
-
-            semantic_context_parts.append(
-                f"""
-[Keyword Retrieval]
+Relevance Score:
+{score}
 
 Content:
-{chunk.chunk_text}
+{document}
 """
             )
 

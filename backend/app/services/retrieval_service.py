@@ -4,6 +4,9 @@ from app.repositories.chunk_repository import (
     ChunkRepository
 )
 from sqlalchemy.orm import Session
+from app.ai.reranking.reranker import (
+    Reranker
+)
 
 class RetrievalService:
 
@@ -22,7 +25,8 @@ class RetrievalService:
 
         vector_results = (
             QdrantService.search_similar_notes(
-                query_embedding=query_embedding
+                query_embedding=query_embedding,
+                limit=10
             )
         )
 
@@ -30,11 +34,42 @@ class RetrievalService:
         keyword_results = (
             ChunkRepository.keyword_search_chunks(
                 db=db,
-                query=query
+                query=query,
+                limit=10
             )
         )
 
-        return {
-            "vector_results": vector_results,
-            "keyword_results": keyword_results
-        }
+        # Step 3: Collect candidate documents
+        candidate_documents = []
+
+        # Vector candidates
+        for result in vector_results:
+
+            payload = result.payload
+
+            candidate_documents.append(
+                payload["content"]
+            )
+
+        # Keyword candidates
+        for chunk in keyword_results:
+
+            candidate_documents.append(
+                chunk.chunk_text
+            )
+
+        # Remove duplicates
+        candidate_documents = list(
+            set(candidate_documents)
+        )
+
+        # Step 4: Rerank
+        reranked_results = (
+            Reranker.rerank(
+                query=query,
+                documents=candidate_documents,
+                top_k=5
+            )
+        )
+
+        return reranked_results
