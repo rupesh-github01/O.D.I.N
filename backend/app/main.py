@@ -17,6 +17,9 @@ from app.api.conversation_routes import (
     router as conversation_router
 )
 
+from app.models.concept import Concept
+from app.models.relationship import Relationship
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 

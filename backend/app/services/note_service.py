@@ -7,6 +7,10 @@ from app.ai.retrieval.qdrant_service import QdrantService
 from app.ai.chunking.text_chunker import TextChunker
 from app.repositories.chunk_repository import ChunkRepository
 
+from app.services.knowledge_graph_service import (
+    KnowledgeGraphService
+)
+
 
 class NoteService:
 
@@ -52,6 +56,11 @@ class NoteService:
                 content=chunk_text,
                 embedding=embedding
             )
+        # Step 4: Build knowledge graph
+            KnowledgeGraphService.build_knowledge_graph(
+            db=db,
+            text=content
+        )
 
         return note
     @staticmethod
