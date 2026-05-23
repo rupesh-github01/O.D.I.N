@@ -26,3 +26,25 @@ class ChunkRepository:
         db.refresh(chunk)
 
         return chunk
+    @staticmethod
+    def keyword_search_chunks(
+        db: Session,
+        query: str,
+        limit: int = 5
+    ):
+
+        results = (
+            db.query(NoteChunk)
+
+            .filter(
+                NoteChunk.chunk_text.ilike(
+                    f"%{query}%"
+                )
+            )
+
+            .limit(limit)
+
+            .all()
+        )
+
+        return results

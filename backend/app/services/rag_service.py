@@ -58,23 +58,47 @@ class RAGService:
         # Step 4: Semantic retrieval
         retrieval_results = (
             RetrievalService.semantic_search(
+                db=db,
                 query=question
             )
+        )
+
+        vector_results = (
+            retrieval_results["vector_results"]
+        )
+
+        keyword_results = (
+            retrieval_results["keyword_results"]
         )
 
         # Step 5: Build semantic context
         semantic_context_parts = []
 
-        for result in retrieval_results:
+        # Vector retrieval context
+        for result in vector_results:
 
             payload = result.payload
 
             semantic_context_parts.append(
                 f"""
-                Title: {payload['title']}
+[Vector Retrieval]
 
-                Content:
-                {payload['content']}
+Title: {payload['title']}
+
+Content:
+{payload['content']}
+"""
+            )
+
+        # Keyword retrieval context
+        for chunk in keyword_results:
+
+            semantic_context_parts.append(
+                f"""
+[Keyword Retrieval]
+
+Content:
+{chunk.chunk_text}
 """
             )
 

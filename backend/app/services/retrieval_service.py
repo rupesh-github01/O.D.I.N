@@ -1,20 +1,40 @@
 from app.ai.embeddings.embedding_service import EmbeddingService
 from app.ai.retrieval.qdrant_service import QdrantService
-
+from app.repositories.chunk_repository import (
+    ChunkRepository
+)
+from sqlalchemy.orm import Session
 
 class RetrievalService:
 
     @staticmethod
-    def semantic_search(query: str):
+    def semantic_search(
+        db: Session,
+        query: str
+    ):
 
-        # Step 1: Convert query into embedding
-        query_embedding = EmbeddingService.generate_embedding(
-            text=query
+        # Step 1: Vector retrieval
+        query_embedding = (
+            EmbeddingService.generate_embedding(
+                text=query
+            )
         )
 
-        # Step 2: Search similar vectors
-        results = QdrantService.search_similar_notes(
-            query_embedding=query_embedding
+        vector_results = (
+            QdrantService.search_similar_notes(
+                query_embedding=query_embedding
+            )
         )
 
-        return results
+        # Step 2: Keyword retrieval
+        keyword_results = (
+            ChunkRepository.keyword_search_chunks(
+                db=db,
+                query=query
+            )
+        )
+
+        return {
+            "vector_results": vector_results,
+            "keyword_results": keyword_results
+        }
