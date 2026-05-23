@@ -10,6 +10,9 @@ from app.db.session import get_db
 from app.services.memory_consolidation_service import (
     MemoryConsolidationService
 )
+from app.services.memory_service import (
+    MemoryService
+)
 
 router = APIRouter()
 
@@ -27,3 +30,25 @@ async def consolidate_memory(
             topic=topic
         )
     )
+
+@router.post(
+    "/memory/summarize/{conversation_id}"
+)
+async def summarize_memory(
+    conversation_id: int,
+    db: Session = Depends(get_db)
+):
+
+    summary = (
+        MemoryService
+        .summarize_conversation(
+            db=db,
+            conversation_id=
+            conversation_id
+        )
+    )
+
+    return {
+        "summary":
+        summary.summary
+    }
