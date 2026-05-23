@@ -12,13 +12,13 @@ class Reranker:
     @staticmethod
     def rerank(
         query: str,
-        documents: list[str],
+        documents: list[dict],
         top_k: int = 5
     ):
 
         pairs = [
-            [query, document]
-            for document in documents
+        [query, doc["content"]]
+        for doc in documents
         ]
 
         scores = Reranker.model.predict(
@@ -26,7 +26,10 @@ class Reranker:
         )
 
         ranked = list(
-            zip(documents, scores)
+            zip(
+                documents,
+                scores
+            )
         )
 
         ranked.sort(

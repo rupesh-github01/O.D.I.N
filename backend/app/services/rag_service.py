@@ -15,6 +15,7 @@ from app.services.conversation_service import (
 from app.services.graph_service import (
     GraphService
 )
+
 from app.repositories.learning_repository import (
     LearningRepository
 )
@@ -69,17 +70,20 @@ class RAGService:
         # Step 5: Build semantic context
         semantic_context_parts = []
 
-        for document, score in retrieval_results:
+        for doc, score in retrieval_results:
 
             semantic_context_parts.append(
                 f"""
 [Reranked Context]
 
+Source:
+{doc["source"]}
+
 Relevance Score:
 {score}
 
 Content:
-{document}
+{doc["content"]}
 """
             )
 
@@ -87,7 +91,17 @@ Content:
             semantic_context_parts
         )
 
-        # Step 6: Graph context
+        # Step 6: Build citations
+        citations = []
+
+        for doc, score in retrieval_results:
+
+            citations.append({
+                "source": doc["source"],
+                "score": float(score)
+            })
+
+        # Step 7: Graph context
         graph_context = (
             GraphService.build_graph_context(
                 db=db,
@@ -95,25 +109,25 @@ Content:
             )
         )
 
-        # Step 7: Combined context
+        # Step 8: Combined context
         final_context = f"""
-            Conversation History:
-            {conversation_text}
+Conversation History:
+{conversation_text}
 
-            Relevant Notes:
-            {semantic_context}
+Relevant Notes:
+{semantic_context}
 
-            Knowledge Graph Context:
-            {graph_context}
-        """
+Knowledge Graph Context:
+{graph_context}
+"""
 
-        # Step 8: Generate answer
+        # Step 9: Generate answer
         answer = LLMService.generate_response(
             question=question,
             context=final_context
         )
 
-        # Step 9: Store assistant response
+        # Step 10: Store assistant response
         ConversationService.store_message(
             db=db,
             conversation_id=conversation_id,
@@ -121,28 +135,36 @@ Content:
             content=answer
         )
 
+        # Step 11: Detect learning topic
         detected_topic = "General"
 
         graph_concepts = (
-        GraphService.extract_query_concepts(
-        question=question
+            GraphService.extract_query_concepts(
+                question=question
+            )
         )
-    )
 
         if graph_concepts:
-            detected_topic = graph_concepts[0]
 
+            detected_topic = (
+                graph_concepts[0]
+            )
+
+        # Step 12: Store learning event
         LearningRepository.create_event(
             db=db,
             topic=detected_topic,
             event_type="topic_revisited"
-    )
+        )
 
+        # Step 13: Return response
         return {
             "answer": answer,
+            "citations": citations,
             "conversation_context": conversation_context,
             "retrieved_context": semantic_context_parts
         }
+
     @staticmethod
     def stream_answer(
         db: Session,
@@ -158,19 +180,31 @@ Content:
             )
         )
 
+        # Step 2: Build semantic context
         semantic_context_parts = []
 
-        for document, score in retrieval_results:
+        for doc, score in retrieval_results:
 
             semantic_context_parts.append(
-                document
+                f"""
+[Reranked Context]
+
+Source:
+{doc["source"]}
+
+Relevance Score:
+{score}
+
+Content:
+{doc["content"]}
+"""
             )
 
         semantic_context = "\n\n".join(
             semantic_context_parts
         )
 
-        # Step 2: Graph context
+        # Step 3: Graph context
         graph_context = (
             GraphService.build_graph_context(
                 db=db,
@@ -178,7 +212,7 @@ Content:
             )
         )
 
-        # Step 3: Final context
+        # Step 4: Final context
         final_context = f"""
 Relevant Notes:
 {semantic_context}
@@ -187,7 +221,7 @@ Knowledge Graph Context:
 {graph_context}
 """
 
-        # Step 4: Stream response
+        # Step 5: Stream response
         for chunk in (
             LLMService.stream_response(
                 question=question,

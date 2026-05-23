@@ -47,21 +47,31 @@ class RetrievalService:
 
             payload = result.payload
 
-            candidate_documents.append(
-                payload["content"]
-            )
+            candidate_documents.append({
+    "content": payload["content"],
+    "source": payload["title"]
+})
 
         # Keyword candidates
         for chunk in keyword_results:
 
-            candidate_documents.append(
-                chunk.chunk_text
-            )
+            candidate_documents.append({
+    "content": chunk.chunk_text,
+    "source": "keyword_chunk"
+})
 
         # Remove duplicates
+        unique_documents = {}
+
+        for doc in candidate_documents:
+
+            unique_documents[
+            doc["content"]
+            ] = doc
+
         candidate_documents = list(
-            set(candidate_documents)
-        )
+        unique_documents.values()
+)
 
         # Step 4: Rerank
         reranked_results = (
