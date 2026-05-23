@@ -12,6 +12,10 @@ from app.services.conversation_service import (
     ConversationService
 )
 
+from app.services.graph_service import (
+    GraphService
+)
+
 
 class RAGService:
 
@@ -67,10 +71,10 @@ class RAGService:
 
             semantic_context_parts.append(
                 f"""
-Title: {payload['title']}
+                Title: {payload['title']}
 
-Content:
-{payload['content']}
+                Content:
+                {payload['content']}
 """
             )
 
@@ -78,22 +82,33 @@ Content:
             semantic_context_parts
         )
 
-        # Step 6: Combined context
+        # Step 6: Graph context
+        graph_context = (
+            GraphService.build_graph_context(
+                db=db,
+                question=question
+            )
+        )
+
+        # Step 7: Combined context
         final_context = f"""
-Conversation History:
-{conversation_text}
+            Conversation History:
+            {conversation_text}
 
-Relevant Notes:
-{semantic_context}
-"""
+            Relevant Notes:
+            {semantic_context}
 
-        # Step 7: Generate answer
+            Knowledge Graph Context:
+            {graph_context}
+        """
+
+        # Step 8: Generate answer
         answer = LLMService.generate_response(
             question=question,
             context=final_context
         )
 
-        # Step 8: Store assistant response
+        # Step 9: Store assistant response
         ConversationService.store_message(
             db=db,
             conversation_id=conversation_id,

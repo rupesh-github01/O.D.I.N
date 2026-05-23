@@ -10,11 +10,18 @@ class LLMService:
     ):
 
         prompt = f"""
-You are ODIN, an intelligent personal knowledge assistant.
+You are ODIN, an intelligent cognitive knowledge assistant.
 
-Answer the user's question ONLY using the provided context.
+Use:
+1. conversation history
+2. retrieved semantic memory
+3. knowledge graph relationships
 
-If the answer is not in the context, say:
+to answer intelligently and coherently.
+
+Explain relationships between concepts when relevant.
+
+If the answer is not present in the provided context, say:
 "I could not find relevant information in your notes."
 
 Context:
