@@ -27,6 +27,12 @@ from app.models.summary import Summary
 from app.api.memory_routes import (
     router as memory_router
 )
+from app.models.learning_event import (
+    LearningEvent
+)
+from app.api.learning_routes import (
+    router as learning_router
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -50,6 +56,7 @@ app.include_router(note_router)
 app.include_router(conversation_router)
 app.include_router(graph_router)
 app.include_router(memory_router)
+app.include_router(learning_router)
 
 @app.get("/")
 async def root():

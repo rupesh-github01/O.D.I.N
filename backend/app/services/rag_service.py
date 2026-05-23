@@ -15,6 +15,9 @@ from app.services.conversation_service import (
 from app.services.graph_service import (
     GraphService
 )
+from app.repositories.learning_repository import (
+    LearningRepository
+)
 
 
 class RAGService:
@@ -117,6 +120,23 @@ Content:
             role="assistant",
             content=answer
         )
+
+        detected_topic = "General"
+
+        graph_concepts = (
+        GraphService.extract_query_concepts(
+        question=question
+        )
+    )
+
+        if graph_concepts:
+            detected_topic = graph_concepts[0]
+
+        LearningRepository.create_event(
+            db=db,
+            topic=detected_topic,
+            event_type="topic_revisited"
+    )
 
         return {
             "answer": answer,

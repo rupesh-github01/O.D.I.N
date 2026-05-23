@@ -10,7 +10,9 @@ from app.repositories.chunk_repository import ChunkRepository
 from app.services.knowledge_graph_service import (
     KnowledgeGraphService
 )
-
+from app.repositories.learning_repository import (
+    LearningRepository
+)
 
 class NoteService:
 
@@ -60,6 +62,12 @@ class NoteService:
             KnowledgeGraphService.build_knowledge_graph(
             db=db,
             text=content
+        )
+            
+        LearningRepository.create_event(
+            db=db,
+            topic=title,
+            event_type="note_created"
         )
 
         return note
