@@ -23,6 +23,10 @@ from app.models.relationship import Relationship
 from app.api.graph_routes import (
     router as graph_router
 )
+from app.models.summary import Summary
+from app.api.memory_routes import (
+    router as memory_router
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,10 +47,9 @@ app = FastAPI(
 Base.metadata.create_all(bind=engine)
 
 app.include_router(note_router)
-
 app.include_router(conversation_router)
-
 app.include_router(graph_router)
+app.include_router(memory_router)
 
 @app.get("/")
 async def root():
