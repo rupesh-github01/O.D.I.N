@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.db.database import engine, Base
+
+import app.db.base
 from app.models.note import Note
 
 from app.api.note_routes import router as note_router
@@ -42,6 +44,9 @@ from app.api.conversation_routes import (
 )
 from app.api.analytics_routes import (
     router as analytics_router
+)
+from app.api.flashcard_routes import (
+    router as flashcard_router
 )
 
 @asynccontextmanager
@@ -87,6 +92,9 @@ app.include_router(
 )
 app.include_router(
     analytics_router
+)
+app.include_router(
+    flashcard_router
 )
 
 @app.get("/")
