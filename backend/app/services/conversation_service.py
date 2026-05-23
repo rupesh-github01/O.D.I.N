@@ -7,6 +7,9 @@ from app.repositories.conversation_repository import (
 from app.repositories.message_repository import (
     MessageRepository
 )
+from app.models.conversation import (
+    Conversation
+)
 
 
 class ConversationService:
@@ -46,4 +49,13 @@ class ConversationService:
         return MessageRepository.get_recent_messages(
             db=db,
             conversation_id=conversation_id
+        )
+    @staticmethod
+    def get_all_conversations(
+        db: Session
+    ):
+
+        return (
+            db.query(Conversation)
+            .all()
         )

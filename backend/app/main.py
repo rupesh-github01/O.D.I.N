@@ -37,7 +37,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.chat_routes import (
     router as chat_router
 )
-
+from app.api.conversation_routes import (
+    router as conversation_router
+)
+from app.api.analytics_routes import (
+    router as analytics_router
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -77,6 +82,12 @@ app.include_router(graph_router)
 app.include_router(memory_router)
 app.include_router(learning_router)
 app.include_router(chat_router)
+app.include_router(
+    conversation_router
+)
+app.include_router(
+    analytics_router
+)
 
 @app.get("/")
 async def root():

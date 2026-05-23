@@ -1,4 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import (
+    APIRouter,
+    Depends
+)
+
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -16,12 +20,28 @@ async def create_conversation(
 ):
 
     conversation = (
-        ConversationService.create_conversation(
-            db=db,
-            title="New Conversation"
+        ConversationService
+        .create_conversation(
+            db=db
         )
     )
 
     return {
-        "conversation_id": conversation.id
+        "conversation_id":
+        conversation.id
     }
+
+
+@router.get("/conversations")
+async def get_conversations(
+    db: Session = Depends(get_db)
+):
+
+    conversations = (
+        ConversationService
+        .get_all_conversations(
+            db=db
+        )
+    )
+
+    return conversations
