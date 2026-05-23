@@ -34,6 +34,9 @@ from app.api.learning_routes import (
     router as learning_router
 )
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.chat_routes import (
+    router as chat_router
+)
 
 
 @asynccontextmanager
@@ -73,6 +76,7 @@ app.include_router(conversation_router)
 app.include_router(graph_router)
 app.include_router(memory_router)
 app.include_router(learning_router)
+app.include_router(chat_router)
 
 @app.get("/")
 async def root():

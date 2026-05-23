@@ -143,3 +143,56 @@ Content:
             "conversation_context": conversation_context,
             "retrieved_context": semantic_context_parts
         }
+    @staticmethod
+    def stream_answer(
+        db: Session,
+        conversation_id: int,
+        question: str
+    ):
+
+        # Step 1: Semantic retrieval
+        retrieval_results = (
+            RetrievalService.semantic_search(
+                db=db,
+                query=question
+            )
+        )
+
+        semantic_context_parts = []
+
+        for document, score in retrieval_results:
+
+            semantic_context_parts.append(
+                document
+            )
+
+        semantic_context = "\n\n".join(
+            semantic_context_parts
+        )
+
+        # Step 2: Graph context
+        graph_context = (
+            GraphService.build_graph_context(
+                db=db,
+                question=question
+            )
+        )
+
+        # Step 3: Final context
+        final_context = f"""
+Relevant Notes:
+{semantic_context}
+
+Knowledge Graph Context:
+{graph_context}
+"""
+
+        # Step 4: Stream response
+        for chunk in (
+            LLMService.stream_response(
+                question=question,
+                context=final_context
+            )
+        ):
+
+            yield chunk
