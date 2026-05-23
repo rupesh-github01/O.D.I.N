@@ -27,3 +27,15 @@ async def analyze_learning(
             topic=topic
         )
     )
+
+@router.get("/learning/recommendations")
+async def get_revision_recommendations(
+    db: Session = Depends(get_db)
+):
+
+    return (
+        LearningIntelligenceService
+        .generate_revision_recommendations(
+            db=db
+        )
+    )

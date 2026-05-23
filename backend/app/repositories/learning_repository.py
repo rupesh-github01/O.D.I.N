@@ -42,3 +42,19 @@ class LearningRepository:
 
             .all()
         )
+    @staticmethod
+    def get_all_topics(
+        db: Session
+    ):
+
+        topics = (
+            db.query(
+                LearningEvent.topic
+            )
+
+            .distinct()
+
+            .all()
+        )
+
+        return [t[0] for t in topics]

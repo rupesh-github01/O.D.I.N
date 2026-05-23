@@ -51,3 +51,47 @@ class LearningIntelligenceService:
             "days_since_last_review": days_since_review,
             "revision_recommended": revision_needed
         }
+    @staticmethod
+    def generate_revision_recommendations(
+        db: Session
+    ):
+
+        topics = (
+            LearningRepository.get_all_topics(
+                db=db
+            )
+        )
+
+        recommendations = []
+
+        for topic in topics:
+
+            analysis = (
+                LearningIntelligenceService
+                .analyze_topic(
+                    db=db,
+                    topic=topic
+                )
+            )
+
+            if (
+                analysis.get(
+                    "revision_recommended"
+                )
+            ):
+
+                recommendations.append({
+                    "topic": topic,
+                    "days_since_review":
+                    analysis[
+                        "days_since_last_review"
+                    ]
+                })
+
+        recommendations.sort(
+            key=lambda x:
+            x["days_since_review"],
+            reverse=True
+        )
+
+        return recommendations
